@@ -20,7 +20,7 @@ defmodule DragonStrategy do
     end
   end
 
-  def Whiptail() do
+  def whiptail() do
     dmg = :rand.uniform(50) + 50 # Random in 50 - 100 range
     IO.inspect dmg
 
@@ -33,6 +33,6 @@ defmodule DragonStrategy do
 
   def run() do
     DragonStrategy.receive_dragon_pid()
-    DragonStrategy.Whiptail()
+    DragonStrategy.whiptail()
   end
 end

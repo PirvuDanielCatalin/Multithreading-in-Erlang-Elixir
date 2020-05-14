@@ -1,6 +1,9 @@
 defmodule DragonStrategy do
   use Agent
 
+  ##################################
+  ### Dragon PID ###
+  ##################################
   def init_dragon_pid(dragon_pid) do
     Agent.start_link(fn -> dragon_pid end, name: DS_DRAGON_PID)
   end
@@ -20,17 +23,25 @@ defmodule DragonStrategy do
     end
   end
 
+  ##################################
+  ### Dragon Attacks ###
+  ##################################
   def whiptail() do
     dmg = :rand.uniform(50) + 50 # Random in 50 - 100 range
-    IO.inspect dmg
+    # IO.inspect dmg
 
     d_pid = DragonStrategy.get_dragon_pid()
-    IO.inspect d_pid
+    # IO.inspect d_pid
 
     :timer.sleep(5)
     send d_pid, {:from_ds_whiptail, dmg}
+
+    whiptail()
   end
 
+  ##################################
+  ### Main ###
+  ##################################
   def run() do
     DragonStrategy.receive_dragon_pid()
     DragonStrategy.whiptail()

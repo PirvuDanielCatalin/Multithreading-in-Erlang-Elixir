@@ -2,23 +2,6 @@ defmodule ZombieArcher do
   use Agent
 
   ##################################
-  ### Zombie Archer HP ###
-  ##################################
-  def init_hp(initial_hp) do
-    Agent.start_link(fn -> initial_hp end, name: ZA_HP_PID)
-  end
-
-  def get_hp do
-    Agent.get(ZA_HP_PID, fn zombie_archer_hp -> zombie_archer_hp end)
-  end
-
-  def update_hp(dmg) do
-    Agent.get_and_update(ZA_HP_PID, fn zombie_archer_hp ->
-      {zombie_archer_hp - dmg, zombie_archer_hp - dmg}
-    end)
-  end
-
-  ##################################
   ### Dragon PID ###
   ##################################
   def init_dragon_pid(dragon_pid) do
@@ -47,23 +30,18 @@ defmodule ZombieArcher do
   ##################################
   ### Receive Loop ###
   ##################################
-  def receive_loop() do
+  def receive_loop(za_hp, dragon_pid) do
     receive do
       {:from_zas_shot, dmg} ->
         ZombieArcher.zombie_archer_attack(dmg)
 
       {:from_d_dragon_attack, dmg} ->
-        ZombieArcher.update_hp(dmg)
-    end
-
-    za_hp = ZombieArcher.get_hp()
-
-    if za_hp >= 0 do
-      ZombieArcher.receive_loop()
-    else
-      current_pid = self()
-      dragon_pid = ZombieArcher.get_dragon_pid()
-      send(dragon_pid, {:from_za_zombie_archer_lost, current_pid})
+        if za_hp - dmg > 0 do
+          ZombieArcher.receive_loop(za_hp - dmg, dragon_pid)
+        else
+          current_pid = self()
+          send(dragon_pid, {:from_za_zombie_archer_lost, current_pid})
+        end
     end
   end
 
@@ -71,10 +49,9 @@ defmodule ZombieArcher do
   ### Main ###
   ##################################
   def run() do
-    ZombieArcher.init_hp(100)
-
     ZombieArcher.receive_dragon_pid()
+    d_pid = ZombieArcher.get_dragon_pid()
 
-    ZombieArcher.receive_loop()
+    ZombieArcher.receive_loop(100, d_pid)
   end
 end

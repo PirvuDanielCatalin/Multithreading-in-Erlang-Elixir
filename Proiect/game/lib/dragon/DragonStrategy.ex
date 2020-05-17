@@ -9,17 +9,12 @@ defmodule DragonStrategy do
   end
 
   def get_dragon_pid() do
-    Agent.get(DS_DRAGON_PID, fn (x) -> x end)
+    Agent.get(DS_DRAGON_PID, fn x -> x end)
   end
 
   def receive_dragon_pid() do
     receive do
       {:dragon_pid, d_pid} -> DragonStrategy.init_dragon_pid(d_pid)
-    end
-
-    d_pid = DragonStrategy.get_dragon_pid()
-    if d_pid == nil do
-      DragonStrategy.receive_dragon_pid()
     end
   end
 
@@ -27,16 +22,32 @@ defmodule DragonStrategy do
   ### Dragon Attacks ###
   ##################################
   def whiptail() do
-    dmg = :rand.uniform(50) + 50 # Random in 50 - 100 range
-    # IO.inspect dmg
+    dmg = Enum.random(50..100)
 
     d_pid = DragonStrategy.get_dragon_pid()
-    # IO.inspect d_pid
 
     :timer.sleep(5)
-    send d_pid, {:from_ds_whiptail, dmg}
+    send(d_pid, {:from_ds_whiptail, dmg})
+  end
 
-    whiptail()
+  def dragon_breath() do
+    dmg = Enum.random(50..150)
+
+    d_pid = DragonStrategy.get_dragon_pid()
+
+    :timer.sleep(5)
+    send(d_pid, {:from_ds_dragon_breath, dmg})
+  end
+
+  def attack() do
+    type = Enum.random(1..5)
+
+    case type do
+      1 -> DragonStrategy.dragon_breath()
+      _ -> DragonStrategy.whiptail()
+    end
+
+    DragonStrategy.attack()
   end
 
   ##################################
@@ -44,6 +55,6 @@ defmodule DragonStrategy do
   ##################################
   def run() do
     DragonStrategy.receive_dragon_pid()
-    DragonStrategy.whiptail()
+    DragonStrategy.attack()
   end
 end

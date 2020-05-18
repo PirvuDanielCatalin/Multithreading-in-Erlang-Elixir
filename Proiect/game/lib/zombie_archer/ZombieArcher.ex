@@ -14,6 +14,7 @@ defmodule ZombieArcher do
     receive do
       {:from_zas_shot, dmg} ->
         ZombieArcher.zombie_archer_attack(dragon_pid, dmg)
+        ZombieArcher.receive_loop(za_hp, dragon_pid)
 
       {:from_d_dragon_attack, dmg} ->
         if za_hp - dmg > 0 do

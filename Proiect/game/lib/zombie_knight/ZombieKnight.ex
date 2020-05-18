@@ -14,6 +14,7 @@ defmodule ZombieKnight do
     receive do
       {:from_zks_sword_slash, dmg} ->
         ZombieKnight.zombie_knight_attack(dragon_pid, dmg)
+        ZombieKnight.receive_loop(zk_hp, dragon_pid)
 
       {:from_d_dragon_attack, dmg} ->
         if zk_hp - dmg > 0 do
